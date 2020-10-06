@@ -24,7 +24,9 @@ utilizando a ferramenta Selenium (via IDE ou WebDriver).
 Entregar via Moodle um único arquivo ZIP com a seguinte estrutura:
 
 Pasta `codigo`: O código fonte completo.
+
 Pasta `relatorio`: Um PDF com o relatório do grupo
+
  - O relatório deverá indicar a URL do vídeo gravado pelo grupo.
  - *Não incluir o vídeo dentro do ZIP*
 
@@ -33,9 +35,11 @@ Pasta `relatorio`: Um PDF com o relatório do grupo
 ```
 Pessoal,
 
-Conforme combinamos, é possível dissociar as duas grandes partes do trabalho, sendo a primeira a implementação da solução dos médicos e salas de cirurgia e a segunda o uso do Selenium.
+Conforme combinamos, é possível dissociar as duas grandes partes do trabalho, sendo a primeira a implementação da solução dos
+médicos e salas de cirurgia e a segunda o uso do Selenium.
 
-Se o grupo preferir, a implementação poderá ser feita toda em modo texto/console (sem interface gráfica), por exemplo usando Java e JUnit; enquanto que o uso do Selenium poderá ser sobre outra aplicação (Web) qualquer. Verificar antes com o professor a viabilidade.
+Se o grupo preferir, a implementação poderá ser feita toda em modo texto/console (sem interface gráfica), por exemplo usando Java
+e JUnit; enquanto que o uso do Selenium poderá ser sobre outra aplicação (Web) qualquer. Verificar antes com o professor a viabilidade.
 
 Bom trabalho a todos.
 ```
