@@ -21,7 +21,7 @@ utilizando a ferramenta Selenium (via IDE ou WebDriver).
 
 ## Entrega
 
-Entregar via Moodle um único arquivo ZIP com a seguinte estrutura:
+Entregar até dia 20/out via Moodle um único arquivo ZIP com a seguinte estrutura:
 
 Pasta `codigo`: O código fonte completo.
 
