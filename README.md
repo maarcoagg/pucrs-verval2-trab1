@@ -43,6 +43,7 @@ previamente cadastradas ao iniciar.*
 O grupo deverá produzir um relatório contendo:
 
 **1. Folha de rosto com nomes completos dos integrantes.**
+
 **2. Elicitação de Requisitos**
 * Lista de requisitos funcionais e não funcionais identificados pelo grupo, no
 formato que acharem mais adequado.
