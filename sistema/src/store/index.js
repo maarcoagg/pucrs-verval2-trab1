@@ -81,13 +81,26 @@ export default new Vuex.Store({
         medico: 'João Marcos da Silva',
         crm: '3668032',
         especialidade: 'Pediatria',
-        data: '',
-        inicio: '',
-        termino: ''
+        data: '2020-10-05',
+        inicio: '14:00',
+        termino: '16:00'
+      },
+      {
+        sala: 'Beta',
+        tipo: 'Grande',
+        medico: 'Marcos Rocha',
+        crm: '8042896',
+        especialidade: 'Dermatologia',
+        data: '2020-11-15',
+        inicio: '16:00',
+        termino: '18:00'
       }
     ]
   },
   mutations: {
+    adicionarReserva(state, novaReserva) {
+      state.reservas.push(novaReserva)
+    }
   },
   actions: {
   },

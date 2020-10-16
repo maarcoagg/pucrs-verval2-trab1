@@ -5,7 +5,7 @@
         Todas as Alocações e Reservas
         <v-spacer></v-spacer>
         <v-btn color="primary" @click="novaReserva = true">
-          Reservar
+          Nova Reserva
         </v-btn>
       </v-card-title>
 
@@ -76,11 +76,12 @@
         </v-card-title>
 
         <v-card-text>
-          <v-stepper non-linear>
+          <v-stepper non-linear v-model="step">
             <v-stepper-header>
               <v-stepper-step
                 editable
                 step="1"
+                :complete="medicoSelecionado.length > 0"
               >
                 Escolher um médico
               </v-stepper-step>
@@ -90,6 +91,7 @@
               <v-stepper-step
                 editable
                 step="2"
+                :complete="salaSelecionada.length > 0"
               >
                 Escolher uma sala
               </v-stepper-step>
@@ -99,6 +101,7 @@
               <v-stepper-step
                 step="3"
                 editable
+                :complete="dataReserva != null && horaInicioReserva != null && horaFinalReserva != null"
               >
                 Definir data e hora
               </v-stepper-step>
@@ -144,14 +147,14 @@
                   </template>
                 </v-data-table>
 
-                <v-row>
+                <v-row class="mt-4">
                   <v-spacer></v-spacer>
                   <v-btn text @click="novaReserva = false">
                     Cancelar
                   </v-btn>
                   <v-btn
                     color="primary"
-                    @click="nextStep(n)"
+                    @click="step = 2"
                     class="mx-3"
                   >
                     Avançar
@@ -183,14 +186,14 @@
                   </template>
                 </v-data-table>
 
-                <v-row>
+                <v-row class="mt-4">
                   <v-spacer></v-spacer>
-                  <v-btn text @click="novaReserva = false">
+                  <v-btn text @click="step = 1">
                     Voltar
                   </v-btn>
                   <v-btn
                     color="primary"
-                    @click="nextStep(n)"
+                    @click="step = 3"
                     class="mx-3"
                   >
                     Avançar
@@ -221,34 +224,135 @@
                 </v-row>
 
                 <v-row>
-                  <v-col cols="4">
-                    <v-date-picker v-model="dataReserva"></v-date-picker>
+                  <v-col cols="3">
+                    <!-- <v-date-picker v-model="dataReserva"></v-date-picker> -->
+
+                    <v-menu
+                      v-model="menuSelecionarData"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          outlined
+                          v-model="dataReserva"
+                          label="Selecionar a data"
+                          prepend-inner-icon="mdi-calendar"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                        no-title
+                        scrollable
+                        v-model="dataReserva"
+                        @input="menuSelecionarData = false"
+                      ></v-date-picker>
+                    </v-menu>
+
                   </v-col>
-                  <v-col cols="4">
-                    <v-time-picker
+                  <v-col cols="3">
+                    <!-- <v-time-picker
                       v-model="horaInicioReserva"
                       :max="horaFinalMinima"
-                    ></v-time-picker>
+                    ></v-time-picker> -->
+
+                    <v-menu
+                      ref="menu"
+                      v-model="menuSelecionarHoraInicial"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      :return-value.sync="horaInicioReserva"
+                      transition="scale-transition"
+                      offset-y
+                      max-width="290px"
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          outlined
+                          v-model="horaInicioReserva"
+                          label="Selecionar hora de inicio"
+                          prepend-inner-icon="mdi-clock-time-four-outline"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-time-picker
+                        v-if="menuSelecionarHoraInicial"
+                        v-model="horaInicioReserva"
+                        full-width
+                        @click:minute="$refs.menu.save(horaInicioReserva)"
+                        :max="horaFinalReserva"
+                      ></v-time-picker>
+                    </v-menu>
                   </v-col>
-                  <v-col cols="4">
-                    <v-time-picker
+                  <v-col cols="3">
+                    <!-- <v-time-picker
                       v-model="horaFinalReserva"
                       :min="horaInicioReserva"
-                    ></v-time-picker>
+                    ></v-time-picker> -->
+
+                    <v-menu
+                      ref="menu2"
+                      v-model="menuSelecionarHoraFinal"
+                      :close-on-content-click="false"
+                      :nudge-right="40"
+                      :return-value.sync="horaFinalReserva"
+                      transition="scale-transition"
+                      offset-y
+                      max-width="290px"
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          outlined
+                          v-model="horaFinalReserva"
+                          label="Selecionar hora de termino"
+                          prepend-inner-icon="mdi-clock-time-four-outline"
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-time-picker
+                        v-if="menuSelecionarHoraFinal"
+                        v-model="horaFinalReserva"
+                        full-width
+                        @click:minute="$refs.menu2.save(horaFinalReserva)"
+                        :min="horaInicioReserva"
+                      ></v-time-picker>
+                    </v-menu>
+                  </v-col>
+
+                  <v-col cols="3">
+                    <v-text-field
+                      outlined
+                      v-model="valorTotal"
+                      label="Total"
+                      prepend-inner-icon="mdi-clock-time-four-outline"
+                      prefix="R$"
+                      readonly
+                    ></v-text-field>
                   </v-col>
                 </v-row>
 
-                <v-row>
+                <v-row class="mt-2">
                   <v-spacer></v-spacer>
-                  <v-btn text>
-                    Cancel
+                  <v-btn text @click="step = 2">
+                    Voltar
                   </v-btn>
                   <v-btn
                     color="primary"
-                    @click="nextStep(n)"
+                    @click="adicionarReserva()"
                     class="mx-3"
                   >
-                    Continue
+                    Confirmar
                   </v-btn>
                 </v-row>
               </v-stepper-content>
@@ -262,9 +366,10 @@
 
 <script>
 export default {
-  name: 'Salas',
+  name: 'Reservas',
   data: () => ({
     tab: null,
+    step: 1,
     novaReserva: null,
     pesquisarMedico: '',
     pesquisarAlocacoes: '',
@@ -276,6 +381,10 @@ export default {
     dataReserva: null,
     horaInicioReserva: null,
     horaFinalReserva: null,
+
+    menuSelecionarData: null,
+    menuSelecionarHoraInicial: null,
+    menuSelecionarHoraFinal: null,
     
     headersAlocacoes: [
       { text: 'Médico', value: 'medico' },
@@ -341,11 +450,27 @@ export default {
       get() {
         return this.horaInicioReserva ? null : null
       }
-    }
+    },
+    valorTotal: {
+      get() {
+        return 0
+      }
+    },
   },
-  watch: {
-    medicoSelecionado() {
-      console.log(this.medicoSelecionado[0])
+  methods: {
+    adicionarReserva() {
+      if (this.medicoSelecionado.length > 0 && this.salaSelecionada.length > 0 && this.dataReserva && this.horaInicioReserva && this.horaFinalReserva) {
+        this.$store.commit('adicionarReserva', {
+          sala: this.salaSelecionada[0].nome,
+          tipo: this.salaSelecionada[0].tipo,
+          medico: this.medicoSelecionado[0].nome,
+          crm: this.medicoSelecionado[0].crm,
+          especialidade: this.medicoSelecionado[0].especialidade,
+          data: this.dataReserva,
+          inicio: this.horaInicioReserva,
+          termino: this.horaFinalReserva
+        })
+      }
     }
   }
 }
