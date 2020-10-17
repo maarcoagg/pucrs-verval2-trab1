@@ -18,6 +18,9 @@
         <v-tab to="/reservas">
           Reservas
         </v-tab>
+        <v-tab to="/configuracoes">
+          Configurações
+        </v-tab>
       </v-tabs>
     </v-app-bar>
 

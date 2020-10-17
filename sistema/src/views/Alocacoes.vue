@@ -2,25 +2,21 @@
   <v-main>
     <v-card>
       <v-card-title>
-        Todas as Reservas
-        <v-spacer></v-spacer>
-        <v-btn color="primary" to="/nova-reserva">
-          Nova Reserva
-        </v-btn>
+        Todas as Alocações
       </v-card-title>
 
       <v-card-text>
         <v-data-table
-          :headers="headersReservas"
-          :items="reservas"
-          :search="pesquisarReservas"
+          :headers="headersAlocacoes"
+          :items="alocacoes"
+          :search="pesquisarAlocacoes"
           class="elevation-1"
         >
           <template v-slot:top>
             <v-text-field
-              v-model="pesquisarReservas"
+              v-model="pesquisarAlocacoes"
               outlined
-              label="Pesquisar reservas"
+              label="Pesquisar alocações"
               class="mx-4 pt-4"
             ></v-text-field>
           </template>
@@ -32,11 +28,11 @@
 
 <script>
 export default {
-  name: 'Reservas',
+  name: 'Alocacoes',
   data: () => ({
-    pesquisarReservas: '',
+    pesquisarAlocacoes: '',
     
-    headersReservas: [
+    headersAlocacoes: [
       { text: 'Médico', value: 'medico' },
       { text: 'Sala', value: 'sala' },
       { text: 'Data', value: 'data' },
@@ -45,11 +41,11 @@ export default {
     ],
   }),
   computed: {
-    reservas: {
+    alocacoes: {
       get() {
-        return this.$store.getters.reservas
+        return this.$store.getters.alocacoes
       }
-    },
+    }
   },
 }
 </script>

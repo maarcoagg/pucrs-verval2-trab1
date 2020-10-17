@@ -84,7 +84,8 @@ export default new Vuex.Store({
         especialidade: 'Pediatria',
         data: '2020-10-05',
         inicio: '14:00',
-        termino: '16:00'
+        termino: '16:00',
+        valor: 800
       },
       {
         sala: 'Beta',
@@ -94,9 +95,15 @@ export default new Vuex.Store({
         especialidade: 'Dermatologia',
         data: '2020-11-15',
         inicio: '16:00',
-        termino: '18:00'
+        termino: '18:00',
+        valor: 2400
       }
-    ]
+    ],
+    configuracoes: {
+      valorSalaPequena: 400.00,
+      valorSalaGrande: 650.00,
+      valorSalaAltoRisco: 1200.00
+    }
   },
   getters: {
     salas: state => {
@@ -110,18 +117,36 @@ export default new Vuex.Store({
     },
     alocacoes: state => {
       const data = format(new Date(), 'yyyy-MM-dd')
-      const hora = format(new Date(), 'hh:mm')
-      return state.reservas.filter(reserva => reserva.data <= data && reserva.inicio < hora)
+      const hora = format(new Date(), 'kk:mm')
+      return state.reservas.filter(reserva => reserva.data < data || (reserva.data == data && reserva.inicio < hora))
     },
     reservas: state => {
       const data = format(new Date(), 'yyyy-MM-dd')
-      const hora = format(new Date(), 'hh:mm')
-      return state.reservas.filter(reserva => reserva.data >= data && reserva.inicio > hora)
+      const hora = format(new Date(), 'kk:mm')
+      return state.reservas.filter(reserva => reserva.data > data || (reserva.data == data && reserva.inicio > hora))
+    },
+    valorSalaPequena: state => {
+      return state.configuracoes.valorSalaPequena
+    },
+    valorSalaGrande: state => {
+      return state.configuracoes.valorSalaGrande
+    },
+    valorSalaAltoRisco: state => {
+      return state.configuracoes.valorSalaAltoRisco
     },
   },
   mutations: {
     adicionarReserva(state, novaReserva) {
       state.reservas.push(novaReserva)
+    },
+    setValorSalaPequena(state, novoValor) {
+      state.configuracoes.valorSalaPequena = novoValor
+    },
+    setValorSalaGrande(state, novoValor) {
+      state.configuracoes.valorSalaGrande = novoValor
+    },
+    setValorSalaAltoRisco(state, novoValor) {
+      state.configuracoes.valorSalaAltoRisco = novoValor
     }
   },
   actions: {

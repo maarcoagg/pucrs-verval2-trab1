@@ -83,6 +83,7 @@
                   color="primary"
                   @click="step = 2"
                   class="mx-3"
+                  :disabled="!(this.selecaoMedicos.length > 0)"
                 >
                   Avançar
                 </v-btn>
@@ -122,6 +123,7 @@
                   color="primary"
                   @click="step = 3"
                   class="mx-3"
+                  :disabled="!(this.selecaoSalas.length > 0)"
                 >
                   Avançar
                 </v-btn>
@@ -199,6 +201,7 @@
                       no-title
                       scrollable
                       v-model="dataReserva"
+                      :min="dataMinima"
                       @input="menuSelecionarData = false"
                     ></v-date-picker>
                   </v-menu>
@@ -233,7 +236,8 @@
                       full-width
                       format="24hr"
                       @click:minute="$refs.menu.save(horaInicioReserva)"
-                      :max="horaFinalReserva"
+                      :min="horaInicialMinima"
+                      :max="horaInicialMaxima"
                     ></v-time-picker>
                   </v-menu>
                 </v-col>
@@ -267,7 +271,8 @@
                       full-width
                       format="24hr"
                       @click:minute="$refs.menu2.save(horaFinalReserva)"
-                      :min="horaInicioReserva"
+                      :min="horaFinalMinima"
+                      :max="'22:00'"
                     ></v-time-picker>
                   </v-menu>
                 </v-col>
@@ -293,6 +298,7 @@
                   color="primary"
                   @click="adicionarReserva()"
                   class="mx-3"
+                  :disabled="!(this.selecaoMedicos.length > 0 && this.selecaoSalas.length > 0 && this.dataReserva && this.horaInicioReserva && this.horaFinalReserva)"
                 >
                   Confirmar
                 </v-btn>
@@ -307,6 +313,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { add, format, parse, sub } from "date-fns";
 
 export default {
   name: 'Reservas',
@@ -357,10 +364,51 @@ export default {
         return this.selecaoSalas[0] ?? {}
       }
     },
-    horaFinalMinima: {
-      get() {
-        return this.horaInicioReserva ? null : null
-      }
+    dataMinima() {
+      const hora = format(new Date(), 'kk:mm')
+      let data
+      
+      if (hora > '20:00')
+        data = format(add(new Date(), { days: 1 }), 'yyyy-MM-dd')
+      else
+        data = format(new Date(), 'yyyy-MM-dd')
+
+      return data
+    },
+    horaInicialMinima() {
+      const dataAtual = format(new Date(), 'yyyy-MM-dd')
+      let horaInicial
+
+      if (this.dataMinima == dataAtual)
+        horaInicial = format(new Date(), 'kk:mm')
+      else
+        horaInicial = '06:00'
+
+      return horaInicial
+    },
+    horaInicialMaxima() {
+      const hora = format(new Date(), 'kk:mm')
+      let horaFinal = this.horaFinalReserva
+      let horaInicial
+
+      if (horaFinal)
+        horaInicial = format(sub(parse(horaFinal, 'kk:mm', new Date()), { hours: 2 }), 'kk:mm')
+      else
+        horaInicial = '20:00'
+
+      return horaInicial
+    },
+    horaFinalMinima() {
+      const hora = format(new Date(), 'kk:mm')
+      let horaInicial = this.horaInicioReserva
+      let horaFinal
+
+      if (horaInicial)
+        horaFinal = format(add(parse(horaInicial, 'kk:mm', new Date()), { hours: 2 }), 'kk:mm')
+      else
+        horaFinal = '08:00'
+
+      return horaFinal
     },
     valorTotal: {
       get() {
@@ -370,24 +418,28 @@ export default {
   },
   methods: {
     adicionarReserva() {
-      if (this.selecaoMedicos.length > 0 && this.selecaoSalas.length > 0 && this.dataReserva && this.horaInicioReserva && this.horaFinalReserva) {
-        this.$store.commit('adicionarReserva', {
-          sala: this.salaSelecionada.nome,
-          tipo: this.salaSelecionada.tipo,
-          medico: this.medicoSelecionado.nome,
-          crm: this.medicoSelecionado.crm,
-          especialidade: this.medicoSelecionado.especialidade,
-          data: this.dataReserva,
-          inicio: this.horaInicioReserva,
-          termino: this.horaFinalReserva
-        })
+      this.$store.commit('adicionarReserva', {
+        sala: this.salaSelecionada.nome,
+        tipo: this.salaSelecionada.tipo,
+        medico: this.medicoSelecionado.nome,
+        crm: this.medicoSelecionado.crm,
+        especialidade: this.medicoSelecionado.especialidade,
+        data: this.dataReserva,
+        inicio: this.horaInicioReserva,
+        termino: this.horaFinalReserva,
+        valor: this.valorTotal
+      })
 
 
-      }
     }
   },
   mounted() {
-    // console.log(format(new Date(), 'hh:mm'))
+    // console.log(format(new Date(), 'kk:mm'))
+    // var result = add(new Date(), {
+    //   hours: 5
+    // })
+    var result = parse('06:00', 'kk:mm', new Date())
+    console.log(result)
   }
 }
 </script>
