@@ -4,7 +4,7 @@
       <v-card-title>
         Todas as Alocações e Reservas
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="novaReserva = true">
+        <v-btn color="primary" to="/nova-reserva">
           Nova Reserva
         </v-btn>
       </v-card-title>

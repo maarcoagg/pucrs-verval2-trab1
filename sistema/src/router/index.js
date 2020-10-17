@@ -26,6 +26,11 @@ const routes = [
     component: () => import('../views/Reservas.vue')
   },
   {
+    path: '/nova-reserva',
+    name: 'Nova Reserva',
+    component: () => import('../views/NovaReserva.vue')
+  },
+  {
     path: '/about',
     name: 'About',
     // route level code-splitting

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { format } from "date-fns";
 
 Vue.use(Vuex)
 
@@ -97,6 +98,27 @@ export default new Vuex.Store({
       }
     ]
   },
+  getters: {
+    salas: state => {
+      return state.salas
+    },
+    medicos: state => {
+      return state.medicos
+    },
+    especialidades: state => {
+      return state.medicos.map(m => m.especialidade).filter(distinct)
+    },
+    alocacoes: state => {
+      const data = format(new Date(), 'yyyy-MM-dd')
+      const hora = format(new Date(), 'hh:mm')
+      return state.reservas.filter(reserva => reserva.data <= data && reserva.inicio < hora)
+    },
+    reservas: state => {
+      const data = format(new Date(), 'yyyy-MM-dd')
+      const hora = format(new Date(), 'hh:mm')
+      return state.reservas.filter(reserva => reserva.data >= data && reserva.inicio > hora)
+    },
+  },
   mutations: {
     adicionarReserva(state, novaReserva) {
       state.reservas.push(novaReserva)
@@ -107,3 +129,7 @@ export default new Vuex.Store({
   modules: {
   }
 })
+
+function distinct(value, index, self) {
+  return self.indexOf(value) === index;
+}
