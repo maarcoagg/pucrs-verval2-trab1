@@ -6,10 +6,9 @@
       </v-card-title>
 
       <v-card-text>
-        <v-stepper non-linear v-model="step">
+        <v-stepper v-model="step">
           <v-stepper-header>
             <v-stepper-step
-              editable
               step="1"
               :complete="selecaoMedicos.length > 0"
             >
@@ -19,7 +18,6 @@
             <v-divider></v-divider>
 
             <v-stepper-step
-              editable
               step="2"
               :complete="selecaoSalas.length > 0"
             >
@@ -30,7 +28,6 @@
 
             <v-stepper-step
               step="3"
-              editable
               :complete="dataReserva != null && horaInicioReserva != null && horaFinalReserva != null"
             >
               Definir data e hora
@@ -57,6 +54,7 @@
                       <v-text-field
                         v-model="pesquisarMedico"
                         outlined
+                        clearable
                         label="Pesquisar médicos"
                       ></v-text-field>
                     </v-col>
@@ -105,18 +103,35 @@
                 class="elevation-1"
               >
                 <template v-slot:top>
-                  <v-text-field
-                    v-model="pesquisarSala"
-                    outlined
-                    label="Pesquisar médicos"
-                  ></v-text-field>
-                  <v-spacer></v-spacer>
+                  <v-row>
+                    <v-col>
+                      <v-text-field
+                        v-model="pesquisarSala"
+                        outlined
+                        clearable
+                        label="Pesquisar médicos"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col>
+                      <v-select
+                        v-model="tipoSelecionado"
+                        :items="tipoSala"
+                        label="Selecionar Tipo de Sala"
+                        clearable
+                        outlined
+                        return-object
+                      ></v-select>
+                    </v-col>
+                  </v-row>
                 </template>
               </v-data-table>
 
               <v-row class="mt-4">
                 <v-spacer></v-spacer>
-                <v-btn text @click="step = 1">
+                <v-btn 
+                  text 
+                  @click="voltar()"
+                >
                   Voltar
                 </v-btn>
                 <v-btn
@@ -282,7 +297,6 @@
                     outlined
                     v-model="valorTotal"
                     label="Total"
-                    prepend-inner-icon="mdi-clock-time-four-outline"
                     prefix="R$"
                     readonly
                   ></v-text-field>
@@ -291,7 +305,10 @@
 
               <v-row class="mt-2">
                 <v-spacer></v-spacer>
-                <v-btn text @click="step = 2">
+                <v-btn 
+                  text 
+                  @click="voltar()"
+                >
                   Voltar
                 </v-btn>
                 <v-btn
@@ -313,15 +330,19 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { add, format, parse, sub } from "date-fns";
+import { add, addHours, differenceInHours, format, parse, sub } from "date-fns";
 
 export default {
   name: 'Reservas',
   data: () => ({
     step: 1,
+
     pesquisarMedico: '',
-    pesquisarSala: '',
     especialidadeSelecionada: '',
+
+    pesquisarSala: '',
+    tipoSelecionado: '',
+
     selecaoSalas: [],
     selecaoMedicos: [],
     dataReserva: null,
@@ -344,11 +365,32 @@ export default {
   }),
   computed: {
     ...mapGetters([
-      'salas',
       'especialidades',
+      'tipoSala',
       'alocacoes',
       'reservas',
+      'valorSalaPequena',
+      'valorSalaGrande',
+      'valorSalaAltoRisco'
     ]),
+    salas: {
+      get() {
+        const especialidade = this.medicoSelecionado ? this.medicoSelecionado.especialidade : ''
+        let salas
+
+        if (especialidade == 'Dermatologia')
+          salas = this.$store.state.salas.filter(s => s.tipo == 'Pequena')
+        else if (especialidade == 'Cirurgia Cardiovascular' || especialidade == 'Neurologia')
+          salas = this.$store.state.salas.filter(s => s.tipo != 'Pequena')
+        else
+          salas = this.$store.state.salas
+
+        if (this.tipoSelecionado)
+          salas = salas.filter(s => s.tipo == this.tipoSelecionado)
+
+        return salas
+      }
+    },
     medicos: {
       get() {
         return this.$store.state.medicos.filter(m => this.selecionado ? m.especialidade == this.selecionado : true)
@@ -364,6 +406,15 @@ export default {
         return this.selecaoSalas[0] ?? {}
       }
     },
+    dataSelecionada() {
+      return this.parseData(this.dataReserva)
+    },
+    horaInicial() {
+      return this.parseHora(this.horaInicioReserva)
+    },
+    horaFinal() {
+      return this.parseHora(this.horaFinalReserva)
+    },
     dataMinima() {
       const hora = format(new Date(), 'kk:mm')
       let data
@@ -376,11 +427,11 @@ export default {
       return data
     },
     horaInicialMinima() {
-      const dataAtual = format(new Date(), 'yyyy-MM-dd')
+      const dataAtual = this.formatarData(new Date())
       let horaInicial
 
-      if (this.dataMinima == dataAtual)
-        horaInicial = format(new Date(), 'kk:mm')
+      if (this.dataSelecionada == dataAtual)
+        horaInicial = this.formatarHora(new Date())
       else
         horaInicial = '06:00'
 
@@ -399,24 +450,52 @@ export default {
       return horaInicial
     },
     horaFinalMinima() {
-      const hora = format(new Date(), 'kk:mm')
+      const dataAtual = this.formatarData(new Date())
+      const horaAtual = this.formatarHora(new Date())
       let horaInicial = this.horaInicioReserva
       let horaFinal
 
       if (horaInicial)
         horaFinal = format(add(parse(horaInicial, 'kk:mm', new Date()), { hours: 2 }), 'kk:mm')
+      else if (this.dataSelecionada == dataAtual && horaAtual > '06:00')
+        horaFinal = this.formatarHora(addHours(new Date(), 2))
       else
         horaFinal = '08:00'
 
       return horaFinal
     },
-    valorTotal: {
-      get() {
-        return 0
+    valorTotal() {
+      let total = 0
+      let diferencaEmHoras = 0
+
+      if (this.horaFinal && this.horaInicial)
+        diferencaEmHoras = differenceInHours(this.horaFinal, this.horaInicial)
+
+      if (this.salaSelecionada.tipo == 'Pequena')
+        total = diferencaEmHoras * this.valorSalaPequena
+      else if (this.salaSelecionada.tipo == 'Grande')
+        total = diferencaEmHoras * this.valorSalaGrande
+      else if (this.salaSelecionada.tipo == 'Alto-risco') {
+        total = diferencaEmHoras * this.valorSalaAltoRisco
+        if (this.horaInicioReserva < '10:00')
+          total = total * 0.9
       }
+
+      return total
     },
   },
   methods: {
+    voltar(){
+      if (this.step == 2) {
+        this.step = 1
+        this.selecaoSalas = []
+      } else if (this.step == 3) {
+        this.step = 2
+        this.dataReserva = null
+        this.horaInicioReserva = null
+        this.horaFinalReserva= null
+      }
+    },
     adicionarReserva() {
       this.$store.commit('adicionarReserva', {
         sala: this.salaSelecionada.nome,
@@ -431,7 +510,51 @@ export default {
       })
 
 
-    }
+    },
+    formatarHora(hora) {
+      const pattern24h = 'kk:mm'
+      let horaFormatada
+
+      if (hora)
+        horaFormatada = format(hora, pattern24h)
+      else
+        horaFormatada = ''
+
+      return horaFormatada
+    },
+    formatarData(data) {
+      const patternData = 'yyyy-MM-dd'
+      let dataFormatada
+
+      if (data)
+        dataFormatada = format(data, patternData)
+      else
+        dataFormatada = ''
+
+      return dataFormatada
+    },
+    parseHora(hora) {
+      const pattern24h = 'kk:mm'
+      let horaParsed
+
+      if (hora)
+        horaParsed = parse(hora, pattern24h, new Date())
+      else
+        horaParsed = ''
+
+      return horaParsed
+    },
+    parseData(data) {
+      const patternData = 'yyyy-MM-dd'
+      let dataParsed
+
+      if (data)
+        dataParsed = parse(data, patternData, new Date())
+      else
+        dataParsed = ''
+
+      return dataParsed
+    },
   },
   mounted() {
     // console.log(format(new Date(), 'kk:mm'))

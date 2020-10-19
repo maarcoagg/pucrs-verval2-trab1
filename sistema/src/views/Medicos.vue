@@ -36,6 +36,15 @@
                 </v-col>
               </v-row>
             </template>
+
+            <!-- <template v-slot:item.total="{ item }">
+              <v-chip
+                :color="getColor(item.calories)"
+                dark
+              >
+                {{ item.calories }}
+              </v-chip>
+            </template> -->
           </v-data-table>
         </v-card-text>
       </v-card>
@@ -55,13 +64,20 @@ export default {
         value: 'nome',
       },
       { text: 'Especialidade', value: 'especialidade' },
-      { text: 'CRM', value: 'crm' }
+      { text: 'CRM', value: 'crm' },
+      { text: 'Total Gasto', value: 'total' }
     ],
   }),
   computed: {
     medicos: {
       get() {
-        return this.$store.state.medicos.filter(m => this.selecionado ? m.especialidade == this.selecionado : true)
+        let medicos = this.$store.state.medicos.filter(m => this.selecionado ? m.especialidade == this.selecionado : true)
+
+        medicos.forEach(medico => {
+          medico.total = this.calcularTotalPorMedico(medico)
+        });
+
+        return medicos
       }
     },
     especialidades: {
@@ -70,5 +86,19 @@ export default {
       }
     }
   },
+  methods: {
+    calcularTotalPorMedico(medico) {
+      let total = 0
+      let alocacoes = this.$store.getters.alocacoes.filter(m => m.crm == medico.crm)
+
+      if (alocacoes.length > 0){
+        let valores = alocacoes.map(a => a.valor)
+
+        total = valores.reduce((total, atual) => total + atual)
+      }
+
+      return total
+    }
+  }
 }
 </script>

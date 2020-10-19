@@ -115,6 +115,9 @@ export default new Vuex.Store({
     especialidades: state => {
       return state.medicos.map(m => m.especialidade).filter(distinct)
     },
+    tipoSala: state => {
+      return state.salas.map(m => m.tipo).filter(distinct)
+    },
     alocacoes: state => {
       const data = format(new Date(), 'yyyy-MM-dd')
       const hora = format(new Date(), 'kk:mm')
