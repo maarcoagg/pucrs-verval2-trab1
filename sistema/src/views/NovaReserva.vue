@@ -28,9 +28,29 @@
 
             <v-stepper-step
               step="3"
-              :complete="dataReserva != null && horaInicioReserva != null && horaFinalReserva != null"
+              :complete="dataReserva != null"
             >
-              Definir data e hora
+              Definir data
+            </v-stepper-step>
+
+            <v-stepper-step
+              step="4"
+              :complete="horaInicioReserva != null"
+            >
+              Definir hora de início
+            </v-stepper-step>
+
+            <v-stepper-step
+              step="5"
+              :complete="horaFinalReserva != null"
+            >
+              Definir hora de fim
+            </v-stepper-step>
+
+            <v-stepper-step
+              step="6"
+            >
+              Concluir
             </v-stepper-step>
           </v-stepper-header>
 
@@ -149,6 +169,109 @@
               step="3"
             >
               <v-row>
+                <v-spacer></v-spacer>
+                <v-date-picker
+                  scrollable
+                  v-model="dataReserva"
+                  :min="dataMinima"
+                  locale="pt-br"
+                  elevation="6"
+                ></v-date-picker>
+                <v-spacer></v-spacer>
+
+              </v-row>
+
+              <v-row class="mt-2">
+                <v-spacer></v-spacer>
+                <v-btn 
+                  text 
+                  @click="voltar()"
+                >
+                  Voltar
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  @click="step = 4"
+                  class="mx-3"
+                  :disabled="!this.dataReserva"
+                >
+                  Continuar
+                </v-btn>
+              </v-row>
+            </v-stepper-content>
+
+            <v-stepper-content
+              step="4"
+            >
+              <v-row>
+                <v-spacer></v-spacer>
+                <v-time-picker
+                  v-model="horaInicioReserva"
+                  format="24hr"
+                  :min="horaInicialMinima"
+                  :max="horaInicialMaxima"
+                  elevation="6"
+                ></v-time-picker>
+                <v-spacer></v-spacer>
+              </v-row>
+
+              <v-row class="mt-2">
+                <v-spacer></v-spacer>
+                <v-btn 
+                  text 
+                  @click="voltar()"
+                >
+                  Voltar
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  @click="step = 5"
+                  class="mx-3"
+                  :disabled="!this.horaInicioReserva"
+                >
+                  Continuar
+                </v-btn>
+              </v-row>
+            </v-stepper-content>
+
+            <v-stepper-content
+              step="5"
+            >
+              <v-row>
+                <v-spacer></v-spacer>
+                <v-time-picker
+                  v-model="horaFinalReserva"
+                  format="24hr"
+                  :min="horaFinalMinima"
+                  :max="'22:00'"
+                  elevation="6"
+                ></v-time-picker>
+                <v-spacer></v-spacer>
+              </v-row>
+
+              <v-row class="mt-2">
+                <v-spacer></v-spacer>
+                <v-btn 
+                  text 
+                  @click="voltar()"
+                >
+                  Voltar
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  @click="step = 6"
+                  class="mx-3"
+                  :disabled="!this.horaFinalReserva"
+                >
+                  Continuar
+                </v-btn>
+              </v-row>
+            </v-stepper-content>
+
+            <v-stepper-content
+              step="6"
+            >
+              <v-row>
                 <v-col>
                   <v-text-field
                     outlined
@@ -193,103 +316,33 @@
 
               <v-row>
                 <v-col cols="3">
-                  <v-menu
-                    v-model="menuSelecionarData"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        outlined
-                        v-model="dataReserva"
-                        label="Selecionar a data"
-                        prepend-inner-icon="mdi-calendar"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      no-title
-                      scrollable
-                      v-model="dataReserva"
-                      :min="dataMinima"
-                      @input="menuSelecionarData = false"
-                    ></v-date-picker>
-                  </v-menu>
-
-                </v-col>
-                <v-col cols="3">
-                  <v-menu
-                    ref="menu"
-                    v-model="menuSelecionarHoraInicial"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    :return-value.sync="horaInicioReserva"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        outlined
-                        v-model="horaInicioReserva"
-                        label="Selecionar hora de inicio"
-                        prepend-inner-icon="mdi-clock-time-four-outline"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-time-picker
-                      v-if="menuSelecionarHoraInicial"
-                      v-model="horaInicioReserva"
-                      full-width
-                      format="24hr"
-                      @click:minute="$refs.menu.save(horaInicioReserva)"
-                      :min="horaInicialMinima"
-                      :max="horaInicialMaxima"
-                    ></v-time-picker>
-                  </v-menu>
+                  <v-text-field
+                    outlined
+                    v-model="dataReserva"
+                    label="Data da reserva"
+                    prepend-inner-icon="mdi-calendar"
+                    readonly
+                  ></v-text-field>
                 </v-col>
 
                 <v-col cols="3">
-                  <v-menu
-                    ref="menu2"
-                    v-model="menuSelecionarHoraFinal"
-                    :close-on-content-click="false"
-                    :nudge-right="40"
-                    :return-value.sync="horaFinalReserva"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        outlined
-                        v-model="horaFinalReserva"
-                        label="Selecionar hora de termino"
-                        prepend-inner-icon="mdi-clock-time-four-outline"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-time-picker
-                      v-if="menuSelecionarHoraFinal"
-                      v-model="horaFinalReserva"
-                      full-width
-                      format="24hr"
-                      @click:minute="$refs.menu2.save(horaFinalReserva)"
-                      :min="horaFinalMinima"
-                      :max="'22:00'"
-                    ></v-time-picker>
-                  </v-menu>
+                  <v-text-field
+                    outlined
+                    v-model="horaInicioReserva"
+                    label="Hora de inicio da reserva"
+                    prepend-inner-icon="mdi-clock-time-four-outline"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="3">
+                  <v-text-field
+                    outlined
+                    v-model="horaFinalReserva"
+                    label="Hora de termino da reserva"
+                    prepend-inner-icon="mdi-clock-time-four-outline"
+                    readonly
+                  ></v-text-field>
                 </v-col>
 
                 <v-col cols="3">
@@ -352,6 +405,11 @@ export default {
     menuSelecionarData: null,
     menuSelecionarHoraInicial: null,
     menuSelecionarHoraFinal: null,
+
+    // horasDeInicioDisponiveis: [],
+    // minutosDeInicioDisponiveis: [],
+    // horasDeFimDisponiveis: [],
+    // minutosDeFimDisponiveis: [],
     
     headersMedicos: [
       { text: 'Nome', value: 'nome' },
@@ -397,7 +455,7 @@ export default {
       }
     },
     medicoSelecionado: {
-      get() {
+      get(a) {
         return this.selecaoMedicos[0] ?? {}
       }
     },
@@ -485,16 +543,17 @@ export default {
     },
   },
   methods: {
-    voltar(){
-      if (this.step == 2) {
-        this.step = 1
+    voltar() {
+      if (this.step == 2)
         this.selecaoSalas = []
-      } else if (this.step == 3) {
-        this.step = 2
+      else if (this.step == 3)
         this.dataReserva = null
+      else if (this.step == 4)
         this.horaInicioReserva = null
+      else if (this.step == 5)
         this.horaFinalReserva= null
-      }
+
+      this.step = this.step - 1
     },
     adicionarReserva() {
       this.$store.commit('adicionarReserva', {
@@ -509,7 +568,7 @@ export default {
         valor: this.valorTotal
       })
 
-
+      this.$router.push('reservas')
     },
     formatarHora(hora) {
       const pattern24h = 'kk:mm'
@@ -555,7 +614,24 @@ export default {
 
       return dataParsed
     },
+    // calcularHorasDeInicioDisponiveis() {
+    //   console.log('horasDeInicioDisponiveis')
+    //   this.horasDeInicioDisponiveis = [12, 14]
+    // },
+    // calcularMinutosDeInicioDisponiveis() {
+    //   console.log('minutosDeInicioDisponiveis')
+    //   this.minutosDeInicioDisponiveis = [25, 35]
+    // },
+    // calcularMinutosDeFimDisponiveis() {
+    //   console.log('minutosDeFimDisponiveis')
+    //   this.minutosDeFimDisponiveis = [12, 16]
+    // },
   },
+  // watch: {
+  //   dataReserva: 'calcularHorasDeInicioDisponiveis',
+  //   horaInicioReserva: 'calcularMinutosDeInicioDisponiveis',
+  //   horaFinalReserva: 'calcularMinutosDeFimDisponiveis',
+  // },
   mounted() {
     // console.log(format(new Date(), 'kk:mm'))
     // var result = add(new Date(), {
