@@ -366,7 +366,7 @@
                 </v-btn>
                 <v-btn
                   color="primary"
-                  @click="adicionarReserva()"
+                  @click="adicionarReserva"
                   class="mx-3"
                   :disabled="!(this.selecaoMedicos.length > 0 && this.selecaoSalas.length > 0 && this.dataReserva && this.horaInicioReserva && this.horaFinalReserva)"
                 >
@@ -378,17 +378,41 @@
         </v-stepper>
       </v-card-text>
     </v-card>
+
+    <v-dialog
+      v-model="avisoErro"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title>
+          Erro
+        </v-card-title>
+        <v-card-text>
+          Horário selecionado não está disponível
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn 
+            @click="avisoErro = false"
+            color="primary"
+          >
+            Fechar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-main>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import { add, addHours, differenceInHours, format, parse, sub } from "date-fns";
+import { add, addHours, areIntervalsOverlapping, differenceInHours, format, parse, sub } from "date-fns";
 
 export default {
   name: 'Reservas',
   data: () => ({
     step: 1,
+    avisoErro: null,
 
     pesquisarMedico: '',
     especialidadeSelecionada: '',
@@ -556,19 +580,38 @@ export default {
       this.step = this.step - 1
     },
     adicionarReserva() {
-      this.$store.commit('adicionarReserva', {
-        sala: this.salaSelecionada.nome,
-        tipo: this.salaSelecionada.tipo,
-        medico: this.medicoSelecionado.nome,
-        crm: this.medicoSelecionado.crm,
-        especialidade: this.medicoSelecionado.especialidade,
-        data: this.dataReserva,
-        inicio: this.horaInicioReserva,
-        termino: this.horaFinalReserva,
-        valor: this.valorTotal
-      })
+      let horaReservas = this.reservas.filter(r => r.sala == this.salaSelecionada.nome && r.data == this.dataReserva)
+      let disponivel = true
 
-      this.$router.push('reservas')
+      if (horaReservas.length > 0) {
+        horaReservas.forEach(hora => {
+          let sobreposicao = areIntervalsOverlapping(
+            { start: this.horaInicial, end: this.horaFinal },
+            { start: this.parseHora(hora.inicio), end: this.parseHora(hora.termino) }
+          )
+
+          if (sobreposicao)
+            disponivel = false
+        });
+      } 
+
+      if (disponivel) {
+        this.$store.commit('adicionarReserva', {
+          sala: this.salaSelecionada.nome,
+          tipo: this.salaSelecionada.tipo,
+          medico: this.medicoSelecionado.nome,
+          crm: this.medicoSelecionado.crm,
+          especialidade: this.medicoSelecionado.especialidade,
+          data: this.dataReserva,
+          inicio: this.horaInicioReserva,
+          termino: this.horaFinalReserva,
+          valor: this.valorTotal
+        })
+
+        this.$router.push('reservas')
+      } else {
+        this.avisoErro = true
+      }
     },
     formatarHora(hora) {
       const pattern24h = 'kk:mm'
@@ -613,6 +656,25 @@ export default {
         dataParsed = ''
 
       return dataParsed
+    },
+    verificarDisponibilidade() {
+      let horaReservas = this.reservas.filter(r => r.sala == this.salaSelecionada.nome && r.data == this.dataReserva)
+
+      if (horaReservas.length > 0) {
+        horaReservas.forEach(hora => {
+          let sobreposicao = areIntervalsOverlapping(
+            { start: this.horaInicial, end: this.horaFinal },
+            { start: this.parseHora(hora.inicio), end: this.parseHora(hora.termino) }
+          )
+
+          if (sobreposicao) {
+            console.log('sobreposicao ' + this.horaInicial + ' ' + this.horaFinal + ' com ' + this.parseHora(hora.inicio) + ' ' + this.parseHora(hora.termino))
+            return false
+          }
+        });
+      } else {
+        return true
+      }
     },
     // calcularHorasDeInicioDisponiveis() {
     //   console.log('horasDeInicioDisponiveis')
