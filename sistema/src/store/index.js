@@ -97,7 +97,18 @@ export default new Vuex.Store({
         inicio: '16:00',
         termino: '18:00',
         valor: 2400
-      }
+      },
+      {
+        sala: 'Alfa',
+        tipo: 'Pequena',
+        medico: 'Diogo Barbosa',
+        crm: '8781163',
+        especialidade: 'Geriatria',
+        data: '2020-11-16',
+        inicio: '16:00',
+        termino: '18:00',
+        valor: 800
+      },
     ],
     configuracoes: {
       valorSalaPequena: 400.00,
