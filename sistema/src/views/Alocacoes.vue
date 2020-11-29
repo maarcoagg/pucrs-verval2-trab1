@@ -131,7 +131,7 @@ export default {
       let total = 0
 
       if (valores.length > 0)
-        total = valores.reduce((total, atual) => total + atual)
+        total = valores.reduce((acc, atual) => acc + atual)
 
       return total
     }
