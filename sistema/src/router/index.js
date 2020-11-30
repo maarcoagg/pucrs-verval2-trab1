@@ -1,5 +1,11 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import Medicos from "../views/Medicos.vue";
+import Salas from "../views/Salas.vue";
+import Reservas from "../views/Reservas.vue";
+import Alocacoes from "../views/Alocacoes.vue";
+import NovaReserva from "../views/NovaReserva.vue";
+import Configuracoes from "../views/Configuracoes.vue";
 
 Vue.use(VueRouter);
 
@@ -11,32 +17,32 @@ const routes = [
   {
     path: "/salas",
     name: "Salas",
-    component: () => import("../views/Salas.vue"),
+    component: Salas,
   },
   {
     path: "/medicos",
     name: "Médicos",
-    component: () => import("../views/Medicos.vue"),
+    component: Medicos,
   },
   {
     path: "/reservas",
     name: "Reservas",
-    component: () => import("../views/Reservas.vue"),
+    component: Reservas,
   },
   {
     path: "/alocacoes",
     name: "Alocações",
-    component: () => import("../views/Alocacoes.vue"),
+    component: Alocacoes,
   },
   {
     path: "/nova-reserva",
     name: "Nova Reserva",
-    component: () => import("../views/NovaReserva.vue"),
+    component: NovaReserva,
   },
   {
     path: "/configuracoes",
     name: "Configurações",
-    component: () => import("../views/Configuracoes.vue"),
+    component: Configuracoes,
   },
 ];
 
