@@ -36,15 +36,6 @@
                 </v-col>
               </v-row>
             </template>
-
-            <!-- <template v-slot:item.total="{ item }">
-              <v-chip
-                :color="getColor(item.calories)"
-                dark
-              >
-                {{ item.calories }}
-              </v-chip>
-            </template> -->
           </v-data-table>
         </v-card-text>
       </v-card>
@@ -94,7 +85,7 @@ export default {
       if (alocacoes.length > 0){
         let valores = alocacoes.map(a => a.valor)
 
-        total = valores.reduce((total, atual) => total + atual)
+        total = valores.reduce((acc, atual) => acc + atual)
       }
 
       return total

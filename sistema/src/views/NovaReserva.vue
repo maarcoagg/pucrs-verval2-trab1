@@ -520,7 +520,6 @@ export default {
       return horaInicial
     },
     horaInicialMaxima() {
-      const hora = format(new Date(), 'kk:mm')
       let horaFinal = this.horaFinalReserva
       let horaInicial
 
